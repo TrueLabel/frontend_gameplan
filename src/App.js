@@ -2,70 +2,124 @@ import {useState, useEffect} from 'react'
 import axios from 'axios'
 import Add from './components/Add'
 import Edit from './components/Edit'
+import Delete from './components/Delete'
 
 const App = () => {
-  const [people, setPeople] = useState([])
+  const [game, setGame] = useState([])
+  
 
-
-  const getPeople = () => {
+// Show Function
+  const getGame = () => {
     axios
-    .get('http://localhost:8000/api/characters')
+    .get('http://localhost:8000/api/game_api')
     .then(
-      (response) => setPeople(response.data),
+      (response) => setGame(response.data),
       (err) => console.error(err)
     )
     .catch((error) => console.error(error))
   }
 
 // Create Funtion
-const handleCreate = (addPerson) => {
-  // let nextId = people[people.length - 1].id + 1
-  axios.post('http://localhost:8000/api/characters', addPerson)
+const handleCreate = (addGame) => {
+  // let nextId = game[game.length - 1].id + 1
+  axios.post('http://localhost:8000/api/game_api', addGame)
   .then((response) => {
-    // addPerson.id = nextId
-    setPeople([...people, response.data])
+    // addGame.id = nextId
+    setGame([...game, response.data])
   })
 }
 
 
 // Delete Function
-  const handleDelete = (deletedPerson) => {
+  const handleDelete = (deletedGame) => {
     axios
-      .delete('http://localhost:8000/api/characters/' + deletedPerson.id)
+      .delete('http://localhost:8000/api/game_api/' + deletedGame.id)
       .then((response) => {
-        setPeople(people.filter(person => person.id !== deletedPerson.id))
+        setGame(game.filter(game => game.id !== deletedGame.id))
       })
   }
 
 // Edit Function
-const handleUpdate = (editPerson) => {
-  axios.put('http://localhost:8000/api/characters/' + editPerson.id, editPerson)
+const handleUpdate = (editGame) => {
+  axios.put('http://localhost:8000/api/game_api/' + editGame.id, editGame)
   .then((response) => {
-    setPeople(people.map((person) => {
-      return person.id !== editPerson.id ? person : editPerson
+    setGame(game.map((game) => {
+      return game.id !== editGame.id ? game : editGame
     }))
   })
 }
 
 
     useEffect(() => {
-      getPeople()
+      getGame()
     }, [])
+
+
+// Total Hours
+
+const [weeklyHours, setWeeklyHours] = useState(0);
+const [totalWeeks, setTotalWeeks] = useState(0);
+
+let totalHours = 0
+
+for (let i = 0; i < game.length; i++ ) {
+  totalHours = totalHours + game[i].length;
+}
+
+let weekHours = 0
+
+
+const handleChange = (event) => {
+  event.preventDefault()
+  setWeeklyHours({[event.target.name]: event.target.value});
+  console.log(weekHours)
+}
+
+// const totalSubmit = (event) => {
+//   event.preventDefault();
+//   setTotalWeeks(Math.floor(totalHours/{weeklyHours}));
+//   console.log({totalWeeks})
+// }
+
+{/* <form onSubmit={totalSubmit}>
+<label htmlFor="totalHours">Hours per Week: </label>
+<input type="number" name="totalHours" value={0} onChange={handleChange} /> */}
+
+// const handleChange = (event) => {
+//   setGame({...game, [event.target.name]: event.target.value})
+// }
+
+// const handleSubmit = (event) => {
+//   event.preventDefault()
+//   props.handleUpdate(game)
+// }
+
+
+
   
   return(
     <>
-    <h1>People</h1>
+    <h1 className="text-lg font-medium leading-6 text-gray-900">GamePlan</h1>
+    <div id='hoursbar'>
+      <h3>Total Hours in Collection: {totalHours}</h3>
+          <label htmlFor="weeklyHours">Hours per Week: </label>
+          <input type="number" name="weeklyHours" onChange={handleChange} />
+      <h3>Total Weeks: {{totalHours}/{weeklyHours}}</h3>
+          
+        
+      {/* <h3> Total Weeks: {totalWeeks}</h3> */}
+    </div>
   <Add handleCreate={handleCreate} />
-  <div className="people">
-    {people.map((person) => {
+  <div className="game md:grid md:grid-cols-3 md:gap-6 md:col-span-1 space-y-6 bg-white px-4 py-5 sm:p-6">
+    {game.map((game) => {
       return (
-        <div className="person" key={person.id}>
-  <h4>Name: {person.name}</h4>
-  <h5>Age: {person.age}</h5>
-  <h5>Main Power: {person.main_power}</h5>
-  <h5>Team: {person.team}</h5>
-  <Edit person={person} handleUpdate={handleUpdate} id={person.id} />
-  <button onClick={()=> {handleDelete(person)}} value={person.id}>
+        <div className="game" key={game.id}>
+  <h4>Title: {game.title}</h4>
+  <h5>Length in Hours: {game.length}</h5>
+  <h5>Metacritic Rating: {game.rating}</h5>
+  <Edit game={game} handleUpdate={handleUpdate} id={game.id} />
+  {/* <Delete /> */}
+  <button onClick={()=> {handleDelete(game)}} value={game.id}>
     <strong>X</strong>
   </button>
   <br/>
